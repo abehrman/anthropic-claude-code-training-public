@@ -9,17 +9,21 @@ Northwind Payments is fictional. Every merchant, cardholder, amount, and card in
 ```bash
 npm install
 npm run dev
+npm run lint
+npm test                                # vitest, node environment, no DOM
+npx vitest run src/lib/money.test.ts    # one file
+npx vitest run -t "test name"           # one test by name
 ```
 
-No database, no seed step, no Docker.
+No database, no seed step, no Docker. Vitest only picks up `src/**/*.test.ts`.
 
 ## Data lives in memory
 
-Seed data is JSON, loaded into a store module at boot. Route handlers read and write that store.
+Seed data is generated at boot by `src/data/generate.ts` from a fixed seed, so every machine gets identical records. `src/data/store.ts` holds it on `globalThis` so dev-server reloads keep one copy. Route handlers read and write that store.
 
 - Writes last for the life of the dev server and vanish on restart. That is expected.
 - Persistence is tracked separately as NWP-203. **Do not add a database, an ORM, or migrations.**
-- If you need more seed data, add it to the JSON. Never edit seed data to make a failing case disappear.
+- If you need more seed data, extend the generator. Never edit seed data to make a failing case disappear.
 
 ## Where the rest of the context lives
 
@@ -38,7 +42,7 @@ These four explain most of the code, and breaking them is how bugs get in here.
 
 1. **Money is integer minor units.** `$250.00` is `25000`. No floats, no strings with currency symbols. Format once, at the edge, next to its currency code.
 2. **Storage and bucketing are UTC.** Display converts to the merchant's timezone. Nothing else does.
-3. **One query builder.** Payment filtering goes through the builder behind `GET /api/payments`. A second implementation is a bug, not a shortcut.
+3. **One query builder.** Payment filtering goes through `src/data/queries.ts` (`parseFilters` → `filterPayments` → `sortPayments` → `paginate`), the builder behind `GET /api/payments` and the CSV export. A second implementation is a bug, not a shortcut.
 4. **Validate on the server.** Anything from the client — column names, currencies, limits, statuses — is checked against an allowlist before it reaches a query, a filename, or the store.
 
 ## Card rules
