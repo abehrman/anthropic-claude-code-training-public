@@ -83,7 +83,7 @@ The server stays the only place a file is built. `src/lib/csv.ts` gains three sm
 
 ## Out of scope
 
-- Amount sort compares strings (`queries.ts:78-80`), so `9999` sorts after `10000`. That's a real bug, but a separate ticket.
+- Amount sort compares strings (`queries.ts:79-81`), so `9999` sorts after `10000`. That's a real bug, but a separate ticket.
 - Moving `page.tsx` onto `parseFilters`. Worth doing, not this ticket.
 - Saved export presets, other formats, and persistence (NWP-203).
 
